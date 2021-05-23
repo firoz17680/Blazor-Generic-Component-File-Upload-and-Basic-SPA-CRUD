@@ -1,0 +1,4 @@
+2021-03-26 14:57:21 +05:30 [ERR] [ABC Company] Error created by Firoz
+
+2021-03-26 14:59:07 +05:30 [ERR] [XYZ Company] New Error created by Firoz
+

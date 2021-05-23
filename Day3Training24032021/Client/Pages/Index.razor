@@ -1,0 +1,39 @@
+﻿@page "/"
+@inject HttpClient Http
+<h1>Hello, world!</h1>
+
+Welcome to your new app.        <Button Color="Color.Primary" @onclick="@Toggle">Toggle</Button>
+
+@if (show) {
+<Animate Animation="Animations.SlideLeft" Easing="BlazorAnimate.Easings.EaseInCubic" Duration="TimeSpan.FromSeconds(0.5)" Delay="TimeSpan.FromSeconds(1)">
+    <SurveyPrompt Title="How is Blazor working for you?" />
+</Animate>
+}
+
+<hr />
+<p>My Departments Count : @DepartmentList.Count()</p>
+@*<p>Other Departments Count : @DepartmentListCors.Count()</p>*@
+
+
+@code{
+    bool show = false;
+
+    protected void Toggle()
+    {
+        show = !show;
+    }
+
+
+
+
+    protected List<Department> DepartmentList = new List<Department>();
+    protected List<Department> DepartmentListCors = new List<Department>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        DepartmentList = await Http.GetFromJsonAsync<List<Department>>("api/Department");
+        //DepartmentListCors = await Http.GetFromJsonAsync<List<Department>>("https://localhost:44346/api/department");
+
+    }
+
+}

@@ -1,0 +1,136 @@
+﻿@typeparam TItem
+
+@if (DataSourse != null)
+{
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        @Header
+    </thead>
+
+    <tbody>
+        <Virtualize TItem="TItem" Items="@(FilterDataSourse)">
+            @RowTemplate(context)
+
+        </Virtualize>
+    </tbody>
+
+    @if (ShowFooter)
+    {
+
+
+<tfoot>
+            <tr>
+                <td colspan="4">
+                    @if (ShowPagination)
+                    {
+                    <Pagination>
+                        <PaginationItem>
+                            <PaginationLink>
+                                <span aria-hidden="true" @onclick="@GoPrevious">«</span>
+                            </PaginationLink>
+                        </PaginationItem>
+
+                        @for (int i = 1; i <= TotalPageCount; i++)
+                        {
+                            var cpage = i;
+                            <PaginationItem >
+                                <PaginationLink @onclick="@(()=> FilterData(cpage))" Style="@(PageNo==cpage?"background-color:blue;color:white;":"")">
+                                    @cpage
+                                </PaginationLink>
+                            </PaginationItem>
+                        }
+                        <PaginationItem>
+                            <PaginationLink>
+                                <span aria-hidden="true" @onclick="@GoNext">»</span>
+                            </PaginationLink>
+                        </PaginationItem>
+                    </Pagination>
+                    }
+
+                </td>
+                <td colspan="2" class="text-right">
+                    @PageNo of @TotalPageCount (@DataSourse.Count() Items)
+                </td>
+            </tr>
+
+        </tfoot>
+
+    }
+
+</table>
+
+}
+
+
+@code {
+    [Parameter]
+    public List<TItem> DataSourse { get; set; }
+
+    [Parameter]
+    public RenderFragment Header { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> RowTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<List<TItem>> Footer { get; set; }
+
+    [Parameter]
+    public bool ShowFooter { get; set; } = false;
+
+    [Parameter]
+    public int PageSize { get; set; } = 10;
+
+    [Parameter]
+    public bool ShowPagination { get; set; } = true;
+
+
+    protected int TotalPageCount = 0;
+    protected int PageNo = 1;
+
+    protected override void OnInitialized()
+    {
+        TotalPageCount = (int)Math.Ceiling(DataSourse.Count() / (decimal)PageSize);
+
+        FilterData(PageNo);
+    }
+
+
+    private List<TItem> FilterDataSourse { get; set; }
+
+
+    protected void FilterData(int pg)
+    {
+        FilterDataSourse = DataSourse.Skip((pg - 1) * PageSize).Take(PageSize).ToList();
+        PageNo = pg;
+        StateHasChanged();
+    }
+
+    protected void GoPrevious()
+    {
+        if(PageNo == 1)
+        {
+            return;
+        }
+
+        PageNo--;
+        FilterData(PageNo);
+
+
+    }
+
+    protected void GoNext()
+    {
+        if (PageNo == TotalPageCount)
+        {
+            return;
+        }
+
+        PageNo++;
+        FilterData(PageNo);
+
+
+    }
+
+
+}

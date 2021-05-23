@@ -1,0 +1,169 @@
+﻿@page "/Employee"
+
+@inherits EmployeePageBase
+
+<h3>Employee</h3>
+
+@if (mode != FormModes.List)
+{
+    @if (model != null)
+    {
+<EditForm Model="@model" OnValidSubmit="@SaveData">
+
+    <Card>
+        <CardHeader>Employee</CardHeader>
+        <CardBody>
+
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Name</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is10">
+                    <TextEdit Placeholder="Please enter the name" @bind-Text="@model.Name" />
+                    <ValidationMessage  For="@(()=> model.Name)" />
+                </FieldBody>
+            </Field>
+
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Joining Date</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+                    <DateEdit TValue="DateTime?" Placeholder="Please enter joining date" @bind-Date="@model.JoiningDate"></DateEdit>
+                    @if(ErrorDate != null)
+                            {
+                            <div class="text-danger">@ErrorDate</div>
+                            }
+                </FieldBody>
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Salary</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+                    <NumericEdit TValue="decimal?" Decimals="2" Placeholder="Please enter salary" @bind-Value="@model.Salary" />
+                </FieldBody>
+            </Field>
+
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Department</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+
+
+                    <Autocomplete TItem="Department" TValue="Guid?" @bind-SelectedValue="@model.DepartmentId"
+                                  Data="@DepartmentList"
+                                  TextField="@((item)=>item.Name)"
+                                  ValueField="@((item)=>item.Id)" />
+
+
+
+                </FieldBody>
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Designation</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+                    <Autocomplete TItem="Designation" TValue="Guid?" @bind-SelectedValue="@model.DesignationId"
+                                  Data="@DesignationList"
+                                  TextField="@((item)=>item.Name)"
+                                  ValueField="@((item)=>item.Id)" />
+                </FieldBody>
+            </Field>
+
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">City</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+                    <Autocomplete TItem="City" TValue="Guid?" @bind-SelectedValue="@model.CityId"
+                                  Data="@CityList"
+                                  TextField="@((item)=>item.Name)"
+                                  ValueField="@((item)=>item.Id)">
+
+
+                    </Autocomplete>
+
+                </FieldBody>
+
+                <FieldLabel ColumnSize="ColumnSize.Is2" Class="text-right">Email</FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is4">
+                    <TextEdit Placeholder="Please enter the email" @bind-Text="@model.Email" />
+                    <ValidationMessage For="@(()=> model.Email)" />
+                </FieldBody>
+
+
+            </Field>
+
+
+        </CardBody>
+        <CardFooter>
+
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+
+
+            <Button Type="Blazorise.ButtonType.Submit" Color="Color.Success">Save</Button>
+            <Button Color="Color.Light" @onclick="@ShowList">Show List</Button>
+        </CardFooter>
+    </Card>
+
+</EditForm>
+
+        
+    }
+
+}
+else
+{
+    @if (EmployeeList == null)
+    {
+        <div class="spinner-grow"></div>
+
+    }
+    else
+    {
+<p>
+    <Button Color="Color.Primary" @onclick="@AddNew">Add</Button>
+ 
+</p>
+        <DataGrid TItem="Employee"
+                  Data="@EmployeeList"
+                  Filterable="true"
+                  FilterMethod="DataGridFilterMethod.StartsWith">
+
+            <DataGridColumn TItem="Employee" Field="@(nameof(Employee.Name))" Caption="Name"></DataGridColumn>
+            <DataGridDateColumn TItem="Employee" Field="@(nameof(Employee.JoiningDate))" Caption="Joining Date"></DataGridDateColumn>
+            <DataGridColumn TItem="Employee" Field="Department.Name" Caption="Department">
+            </DataGridColumn>
+            <DataGridColumn TItem="Employee" Field="Designation.Name" Caption="Designation">
+            </DataGridColumn>
+
+            <DataGridColumn TItem="Employee" Field="City.Name" Caption="City" Context="cty">
+                <DisplayTemplate>
+                    @if(cty.City != null)
+                    {
+                        <span>@cty.City.Name</span>
+                    }
+                     else
+                    {
+                        <span></span>
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+    
+            <DataGridNumericColumn TItem="Employee" Field="@(nameof(Employee.Salary))" Caption="Salary"></DataGridNumericColumn>
+            <DataGridDateColumn TItem="Employee" Field="@(nameof(Employee.CreationDate))" Caption="CreatedAt">
+                <DisplayTemplate>
+                    <Badge Color="Color.Primary">@context.CreationDate</Badge>
+                </DisplayTemplate>
+            </DataGridDateColumn>
+            <DataGridColumn TItem="Employee" Field="@(nameof(Employee.Id))" Caption="">
+                <DisplayTemplate>
+                    <Button Color="Color.Primary" @onclick="@(()=> EditData(context))">Edit</Button>
+                    <Button Color="Color.Danger" @onclick="@(()=> Popup(context.Id))">Delete</Button>
+
+                </DisplayTemplate>
+
+
+
+            </DataGridColumn>
+
+
+
+        </DataGrid>
+
+    }
+
+}
+
+
+<DeleteBox @ref="deleteBox"  DeleteClicked="DeleteData" >
+
+</DeleteBox>

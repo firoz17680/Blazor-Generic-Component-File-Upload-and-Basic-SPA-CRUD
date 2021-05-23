@@ -1,0 +1,133 @@
+﻿@page "/fetchdata"
+@using Day3Training24032021.Shared
+@inject HttpClient Http
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+<Field Horizontal="true">
+    <FieldLabel ColumnSize="ColumnSize.Is2">Count</FieldLabel>
+    <FieldBody ColumnSize="ColumnSize.Is2">
+
+        <NumericEdit TValue="int" @bind-Value="@cnt" />
+    </FieldBody>
+    <FieldBody ColumnSize="ColumnSize.Is2">
+        <Button Color="Color.Primary" @onclick="@ShowList">Load</Button>
+
+    </FieldBody>
+    <FieldBody ColumnSize="ColumnSize.Is2">
+        <Check TValue="bool">Show Pagination</Check>
+
+    </FieldBody>
+</Field>
+
+
+
+
+    <MyGrid TItem="WeatherForecast" DataSourse="@forecasts" ShowFooter="@footer">
+        <Header>
+            <tr>
+                <th>
+                </th>
+                <th><b>Sno</b></th>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+                <th>Duration</th>
+            </tr>
+        </Header>
+        <RowTemplate Context="forecast">
+            <tr style="@(forecast.Checked?"color:blue;":"")" >
+                <td><Check TValue="bool" @bind-Checked="@forecast.Checked"></Check></td>
+                <td>@forecast.Sno</td>
+                <td><DateEdit TValue="DateTime" @bind-Date="@forecast.Date" /></td>
+                <td><NumericEdit TValue="int" @bind-Value="@forecast.TemperatureC" /></td>
+                <td>@forecast.TemperatureF</td>
+                <td>@forecast.Summary</td>
+                <td>@(DateTime.Now.Year - forecast.Date.Year)</td>
+
+            </tr>
+
+        </RowTemplate>
+
+
+
+
+    </MyGrid>
+
+    <p>Select rows : @(forecasts.Where(x=>x.Checked==true).Count())</p>
+    
+    @*<Virtualize TItem="WeatherForecast" Items="@forecasts" Context="forecast">
+            <tr>
+                <td>@forecast.Sno</td>
+                <td><input type="date" @bind="@forecast.Date" /></td>
+                <td>@forecast.TemperatureC</td>
+                <td>@forecast.TemperatureF</td>
+                <td>@forecast.Summary</td>
+                <td>@(DateTime.Now.Year - forecast.Date.Year)</td>
+            </tr>
+
+        </Virtualize>*@
+
+
+    @*@foreach (var forecast in forecasts)
+        {
+        <tr>
+            <td>@forecast.Sno</td>
+            <td><input type="date" @bind="@forecast.Date" /></td>
+            <td>@forecast.TemperatureC</td>
+            <td>@forecast.TemperatureF</td>
+            <td>@forecast.Summary</td>
+            <td>@(DateTime.Now.Year - forecast.Date.Year)</td>
+        </tr>
+        }*@
+
+}
+
+@code {
+
+    protected bool footer = true;
+    protected int cnt = 100;
+
+    private List<WeatherForecast> forecasts;
+    protected string token;
+
+    User user = new User
+    {
+        Id = Guid.Parse("19d24a73-20ef-4775-8c9c-973ab6c62a5b"),
+        Name = "abc@gmail.com",
+        Password = "123",
+        Token = null
+    };
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ShowList();
+    }
+
+    protected async Task ShowList()
+    {
+
+        HttpResponseMessage res = await Http.PostAsJsonAsync("api/Token", user);
+
+        token = res.Content.ReadAsStringAsync().Result;
+        Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+
+        forecasts = await Http.GetFromJsonAsync<List<WeatherForecast>>($"WeatherForecast/count/{cnt}");
+
+    }
+
+
+}

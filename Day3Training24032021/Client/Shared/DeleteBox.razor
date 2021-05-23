@@ -1,0 +1,43 @@
+﻿
+<Modal @ref="modalRef">
+    <ModalContent IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>Delete Box</ModalTitle>
+            <CloseButton @onclick="@(()=>HideModal(false))" />
+        </ModalHeader>
+        <ModalBody>
+            Want to delete ?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@(()=>HideModal(false))">Close</Button>
+            <Button Color="Color.Danger" Clicked="@(()=>HideModal(true))">Delete</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+
+
+    [Parameter]
+    public EventCallback<bool> DeleteClicked { get; set; }
+
+
+    private Modal modalRef;
+
+    public void ShowModal()
+    {
+        modalRef.Show();
+    }
+
+    public async Task HideModal(bool value)
+    {
+        modalRef.Hide();
+        await DeleteClicked.InvokeAsync(value);
+    }
+
+
+
+
+
+}
+

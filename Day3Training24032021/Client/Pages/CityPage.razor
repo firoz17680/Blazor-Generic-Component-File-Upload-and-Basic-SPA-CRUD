@@ -1,0 +1,35 @@
+﻿@page "/City"
+@inject HttpClient Http
+<h3>CityPage</h3>
+
+<form>
+    <FormElement Label="Name">
+        <Control>
+            <TextEdit Placeholder="Name" />
+        </Control>
+    </FormElement>
+
+    <FormElement Label="Country">
+        <Control>
+            <Autocomplete TItem="Country" TValue="Guid?" @bind-SelectedValue="@did"
+                          Data="@DepartmentList"
+                          TextField="@((item)=>item.Name)"
+                          ValueField="@((item)=>item.Id)" />
+
+        </Control>
+    </FormElement>
+
+
+</form>
+
+@code {
+    Guid? did;
+    protected List<Country> DepartmentList = new List<Country>();
+
+    protected override  async Task OnInitializedAsync()
+    {
+        DepartmentList = await Http.GetFromJsonAsync<List<Country>>("api/Country");
+
+    }
+
+}
